@@ -5,7 +5,7 @@ const client = net.createConnection({port: 5000}, () => {
     console.log('Connected to server.')
 })
 client.on('data', data => {
-    console.log('Message from server: ' + data.toString())
+    console.log(data.toString())
 })
 client.on('end', () => {
     client.end()
