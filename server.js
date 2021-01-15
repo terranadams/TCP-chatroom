@@ -25,11 +25,7 @@ let server = net.createServer(client => {
         console.log(`Number of clients: ${clients.length}` + '\n')
     })
 
-
-    // all pipe does is forward events to other streams  //
-    process.stdin.on('data', data => {
-        client.write('\n' + `Server: ${data}`)
-    })
+    
 
     function broadcast(message, sender) {
         sender.write('')
@@ -75,6 +71,12 @@ let server = net.createServer(client => {
         process.stdout.write('')
     }
 
+})
+
+process.stdin.on('data', data => { // This must be outside of the createServer callback
+    clients.forEach(x => {
+        x.write(`Server: ${data}`)
+    })
 })
 
 server.listen(5000, () => {
