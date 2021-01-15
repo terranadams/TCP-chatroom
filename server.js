@@ -1,45 +1,78 @@
 const net = require('net')
 
 let clients = []
+let newClientId = 1
 let server = net.createServer(client => {
     client.name = client.remoteAddress + client.remoteAddress
-    client.id = clients.length + 1
+    client.id = newClientId
+    newClientId++
     clients.push(client)
-    console.log('Number of clients: ' + clients.length)
+    console.log('\n' + 'A new client has arrived.')
+    console.log(`Number of clients: ${clients.length}` + '\n')
 
-    client.write('Welcome to the chatroom!')
+    informClientAddition(client)
 
+    client.write('\n' + 'You are connected as Client ' + client.id + '\n' + 'Welcome to the chatroom!' + '\n') 
+ 
     client.on('data', data => {
-
         broadcast(data, client)
 
     })
 
     client.on('end', () => {
-        clients.splice(clients.indexOf(socket), 1);
-        broadcast(client.name + " left the chat.\n");
+        informClientRemoval(client)
+        clients.splice(clients.indexOf(client), 1);
+        console.log(`Number of clients: ${clients.length}` + '\n')
     })
 
 
     // all pipe does is forward events to other streams  //
     process.stdin.on('data', data => {
-        client.write(`Server: ${data}`)
+        client.write('\n' + `Server: ${data}`)
     })
 
     function broadcast(message, sender) {
+        sender.write('')
         let theIndex
         clients.forEach((client, index) => {
             if (client === sender) { theIndex = index; return }
         })
-        clients.forEach(function (client) {
+        clients.forEach(x => {
             // Don't want to send it to sender
-            if (client === sender) return;
-            client.write('Client ' + (clients[theIndex].id) + ': ' + message)
-
-        });
-        let serverOutput = `Client ${clients[theIndex].id}: ${message}`
+            if (x === sender) return;
+            x.write('\n' + 'Client ' + (clients[theIndex].id) + ': ' + message)
+        })
+        let serverOutput = '\n' + `Client ${clients[theIndex].id}: ${message}` + '\n'
         // Log it to the server output too
         process.stdout.write(serverOutput)
+    }
+
+    function informClientRemoval(sender) {
+        let theIndex
+        clients.forEach((client, index) => {
+            if (client === sender) { theIndex = index; return }
+        })
+        clients.forEach(x => {
+            // Don't want to send it to sender
+            if (x === sender) return;
+            x.write(`Client ${clients[theIndex].id} has left the chat.` + '\n')
+        })
+        let serverOutput = `Client ${clients[theIndex].id} has left the chat.` + '\n'
+        // Log it to the server output too
+        process.stdout.write(serverOutput)
+    }
+
+    function informClientAddition(sender) {
+        let theIndex
+        clients.forEach((client, index) => {
+            if (client === sender) { theIndex = index; return }
+        })
+        clients.forEach(x => {
+            // Don't want to send it to sender
+            if (x === sender) return;
+            x.write(`Client ${clients[theIndex].id} has joined the chat.` + '\n')
+        })
+        process.stdout.write('')
     }
 
 })
