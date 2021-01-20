@@ -20,7 +20,7 @@ let server = net.createServer(client => {
  
     client.on('data', data => {
         broadcast(data, client) // This is a custom function that rebroadcasts client messages to the other clients without resending it back to the sender
-        chatLog += `Client ${client.id}: ${data} \n`
+        chatLog += `Client ${client.id}: ${data}`
         fs.writeFile('./chat.log', chatLog, () => {})
     })
 
@@ -60,7 +60,7 @@ let server = net.createServer(client => {
             if (x === sender) return;
             x.write(`Client ${clients[theIndex].id} has left the chat.` + '\n')
         })
-        let serverOutput = `Client ${clients[theIndex].id} has left the chat.` + '\n'
+        let serverOutput = `Client ${clients[theIndex].id} has left the chat.`
         // Log it to the server output too
         process.stdout.write(serverOutput)
     }
@@ -85,6 +85,8 @@ process.stdin.on('data', data => { // This must be outside of the createServer c
     clients.forEach(x => {
         x.write(`Server: ${data}`)
     })
+    chatLog += `Server: ${data}`
+    fs.writeFile('./chat.log', chatLog, () => {})
 })
 
 server.listen(5000, () => {
