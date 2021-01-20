@@ -20,7 +20,7 @@ let server = net.createServer(client => {
  
     client.on('data', data => {
         broadcast(data, client) // This is a custom function that rebroadcasts client messages to the other clients without resending it back to the sender
-        chatLog += `Client ${client.id}: ${data}`
+        chatLog += `Client ${client.id}: ${data} \n`
         fs.writeFile('./chat.log', chatLog, () => {})
     })
 
