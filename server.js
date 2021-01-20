@@ -1,5 +1,7 @@
 const net = require('net')
+const fs = require('fs')
 
+let chatLog = ''
 let clients = []
 let newClientId = 1
 let server = net.createServer(client => {
@@ -7,8 +9,8 @@ let server = net.createServer(client => {
     client.id = newClientId // We use this to prevent new clients from having the name of old clients
     newClientId++ // We use this to prevent new clients from having the name of old clients
     clients.push(client) // We increment the number so that regardless of how many clients are still in the chat, they'll never have the same name
-    
-    
+    chatLog += `Client ${client.id} has joined the chat. \n`
+    fs.writeFile('./chat.log', chatLog, () => {})
     console.log('\n' + 'A new client has arrived.')
     console.log(`Number of clients: ${clients.length}` + '\n')
 
@@ -18,12 +20,16 @@ let server = net.createServer(client => {
  
     client.on('data', data => {
         broadcast(data, client) // This is a custom function that rebroadcasts client messages to the other clients without resending it back to the sender
+        chatLog += `Client ${client.id}: ${data}`
+        fs.writeFile('./chat.log', chatLog, () => {})
     })
 
     client.on('end', () => {
         informClientRemoval(client) // This is a custom function that informs the other clients of this client's disconnection
         clients.splice(clients.indexOf(client), 1); // This removes this specific client's spot in the array of clients
         console.log(`Number of clients: ${clients.length}` + '\n')
+        chatLog += `Client ${client.id} has left the chat. \n`
+        fs.writeFile('./chat.log', chatLog, () => {})
     })
 
     
