@@ -1,6 +1,7 @@
 const net = require('net')
 const fs = require('fs')
 
+let password = 'skatelife'
 let chatLog = ''
 let clients = []
 let newClientId = 1
@@ -37,8 +38,20 @@ let server = net.createServer(client => {
                 client.write('Too many arguments. Try again.')
             } else {
                 clientList = clients.map(x => x.id).join(' ')
-                // console.log(clientList)
                 client.write(clientList)
+            }
+        } else if (dataArray[0] == '/kick') {
+            if (!dataArray[1]) {
+                client.write('Not enough arguments. Try again.')
+            } else if (dataArray[3]) {
+                client.write('Too many arguments. Try again.')
+            } else {
+                let kicked = clients.filter(x => x.id == dataArray[1])[0]
+                if (kicked && dataArray[2] == password) {
+                    kicked.write(`You've been kicked out of the chat, sorry... \n`)
+                    // clients = clients.filter(x => x.id !== dataArray[1])
+                    kickedOut(kicked)
+                }
             }
         } else {
             broadcast(`\n${client.id}: ${dataString}\n`, client)
@@ -56,8 +69,6 @@ let server = net.createServer(client => {
         fs.writeFile('./chat.log', chatLog, () => {})
     })
 
-    
-
     function broadcast(message, sender) { // We prevent resending the client's message being sent back to itself by capturing its index
         clients.forEach(x => {
             // Don't want to send it to sender
@@ -65,6 +76,16 @@ let server = net.createServer(client => {
             x.write(message)
         })
         console.log(message)
+    }
+
+    function kickedOut(kicked) {
+        clients.forEach(x => {
+            if (x.id == kicked.id) return
+            x.write(`Server: ${kicked.id} has been kicked out of the chat. \n`)
+        })
+        chatLog += `Server: ${kicked.id} has been kicked out of the chat. \n`
+        fs.writeFile('./chat.log', chatLog, () => {})
+        console.log(`${kicked.id} has been kicked out of the chat. \n`)
     }
 })
 
