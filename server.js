@@ -58,6 +58,23 @@ let server = net.createServer(client => {
                     kickedOut(kicked)
                 }
             }
+        } else if (dataArray[0] == '/w') {
+            if (!dataArray[2]) {
+                client.write('Not enough Arguments. Try again.')
+            } else {
+                let reciever = clients.filter(x => x.id == dataArray[1])[0]
+                if (!reciever) {
+                    client.write('That username is not present in the chatroom.')
+                } else if (client.id == reciever.id) {
+                    client.write('Sending a message to yourself is pointless here.')
+                } else {
+                    message = dataArray.slice(2, dataArray.length).join(' ')
+                    reciever.write(`Whisper from ${client.id}: ${message}\n`)
+                    chatLog += `Whisper from ${client.id} to ${reciever.id}: ${message}\n`
+                    fs.writeFile('./chat.log', chatLog, () => {})
+                    console.log(`Whisper from ${client.id} to ${reciever.id}: ${message}\n`)
+                }
+            }
         } else {
             broadcast(`\n${client.id}: ${dataString}\n`, client)
             chatLog += `${client.id}: ${dataString}\n`
