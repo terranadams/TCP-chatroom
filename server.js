@@ -41,15 +41,20 @@ let server = net.createServer(client => {
                 client.write(clientList)
             }
         } else if (dataArray[0] == '/kick') {
-            if (!dataArray[1]) {
+            if (!dataArray[2]) {
                 client.write('Not enough arguments. Try again.')
             } else if (dataArray[3]) {
                 client.write('Too many arguments. Try again.')
             } else {
                 let kicked = clients.filter(x => x.id == dataArray[1])[0]
-                if (kicked && dataArray[2] == password) {
-                    kicked.write(`You've been kicked out of the chat, sorry... \n`)
-                    // clients = clients.filter(x => x.id !== dataArray[1])
+                if (!kicked) {
+                    client.write(`That username is not present in the chatroom.`)
+                } else if (client.id == kicked.id) {
+                    client.write(`If you want to leave the chat, just disconnect yourself.`)
+                } else if (kicked && dataArray[2] !== password) {
+                    client.write(`The password is incorrect. Try again.`)
+                } else {
+                    kicked.write(`\nYou've been kicked out of the chat, sorry... \n`)
                     kickedOut(kicked)
                 }
             }
@@ -81,7 +86,7 @@ let server = net.createServer(client => {
     function kickedOut(kicked) {
         clients.forEach(x => {
             if (x.id == kicked.id) return
-            x.write(`Server: ${kicked.id} has been kicked out of the chat. \n`)
+            x.write(`\nServer: ${kicked.id} has been kicked out of the chat. \n`)
         })
         chatLog += `Server: ${kicked.id} has been kicked out of the chat. \n`
         fs.writeFile('./chat.log', chatLog, () => {})

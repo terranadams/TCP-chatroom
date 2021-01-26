@@ -5,7 +5,7 @@ const client = net.createConnection({port: 5000}, () => {
     // console.log('\n' + 'Connected to server.')
 })
 client.on('data', data => {
-    if (data.toString() == `You've been kicked out of the chat, sorry... \n`) {
+    if (data.toString() == `\nYou've been kicked out of the chat, sorry... \n`) {
         console.log(data.toString())
         client.end()
     }
