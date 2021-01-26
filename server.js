@@ -32,11 +32,20 @@ let server = net.createServer(client => {
                 client.id = dataArray[1]
                 fs.writeFile('./chat.log', chatLog, () => {})
             }
+        } else if (dataArray[0] == '/clientlist') {
+            if (dataArray[1]) {
+                client.write('Too many arguments. Try again.')
+            } else {
+                clientList = clients.map(x => x.id).join(' ')
+                // console.log(clientList)
+                client.write(clientList)
+            }
         } else {
             broadcast(`\n${client.id}: ${dataString}\n`, client)
             chatLog += `${client.id}: ${dataString}\n`
             fs.writeFile('./chat.log', chatLog, () => {})
         }
+        
     })
 
     client.on('end', () => {
